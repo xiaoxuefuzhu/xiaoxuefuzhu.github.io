@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>小学英语辅助</title>
+<style>
+  :root {
+    --blue: #2f7fe0;
+    --blue-dark: #1c4f9c;
+    --blue-bg: #eef4fb;
+    --ink: #22314e;
+    --sub: #7a8aa5;
+    --line: #dce6f2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--blue-bg);
+    color: var(--ink);
+    display: flex; flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* ===== 顶部导航 ===== */
+  header {
+    flex: none;
+    display: flex; align-items: center; gap: 8px;
+    height: 56px; padding: 0 10px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(28, 79, 156, .10);
+    z-index: 10;
+  }
+  .logo {
+    flex: none; width: 40px; height: 40px; border-radius: 12px;
+    background: var(--blue);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px; user-select: none;
+    box-shadow: 0 2px 5px rgba(47, 127, 224, .35);
+  }
+  .app-name { flex: none; font-size: 15px; font-weight: 700; color: var(--blue-dark); white-space: nowrap; }
+  nav {
+    flex: 1; display: flex; gap: 2px; min-width: 0;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav button {
+    flex: none; border: 0; background: transparent;
+    font-size: 14px; color: var(--sub);
+    padding: 8px 10px; border-radius: 10px; cursor: pointer;
+    white-space: nowrap; transition: background .15s, color .15s;
+  }
+  nav button.on { background: var(--blue-bg); color: var(--blue-dark); font-weight: 700; }
+
+  /* ===== 主区域 ===== */
+  main { flex: 1; min-height: 0; position: relative; }
+  .view { position: absolute; inset: 0; display: none; }
+  .view.on { display: flex; }
+
+  /* ===== 首页 ===== */
+  #view-home {
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px; padding: 24px;
+  }
+  .hero-logo {
+    width: 108px; height: 108px; border-radius: 30px;
+    background: var(--blue);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 54px; font-weight: 800;
+    box-shadow: 0 10px 26px rgba(47, 127, 224, .35);
+  }
+  .hero-title { font-size: 24px; font-weight: 800; color: var(--blue-dark); }
+  .hero-sub { font-size: 13px; color: var(--sub); text-align: center; line-height: 1.7; }
+  .hero-tip {
+    margin-top: 8px; font-size: 12px; color: var(--sub);
+    background: #fff; border: 1px solid var(--line);
+    padding: 8px 16px; border-radius: 20px;
+  }
+
+  /* ===== 年级页（单元列表） ===== */
+  #view-grade { flex-direction: column; }
+  .grade-head {
+    flex: none; display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .grade-title { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; color: var(--blue-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .grade-body { flex: 1; overflow-y: auto; padding: 6px 14px 20px; }
+  .book-name {
+    font-size: 14px; font-weight: 700; color: var(--blue-dark);
+    margin: 16px 2px 9px; display: flex; align-items: center; gap: 7px;
+  }
+  .book-name::before { content: ""; width: 4px; height: 14px; border-radius: 2px; background: var(--blue); }
+  .book-soon {
+    font-size: 13px; color: var(--sub);
+    background: #fff; border: 1px dashed var(--line);
+    border-radius: 12px; padding: 16px; text-align: center;
+  }
+  .unit-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  .unit-card {
+    background: #fff; border-radius: 14px; padding: 15px 16px;
+    cursor: pointer; border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(28, 79, 156, .07);
+    transition: transform .12s, border-color .12s, box-shadow .12s;
+  }
+  .unit-card:active { transform: scale(.97); }
+  .unit-card:hover { border-color: var(--blue); box-shadow: 0 3px 12px rgba(47, 127, 224, .15); }
+  .uc-title { font-size: 15px; font-weight: 700; color: var(--blue-dark); line-height: 1.45; }
+  .uc-meta { font-size: 12px; color: var(--sub); margin-top: 7px; }
+
+  /* ===== 课程页 ===== */
+  #view-unit { flex-direction: column; }
+  .unit-head {
+    flex: none; display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .back-btn {
+    flex: none; display: flex; align-items: center; gap: 3px;
+    border: 0; background: var(--blue-bg); color: var(--blue-dark);
+    font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 9px; cursor: pointer;
+  }
+  .unit-title { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; color: var(--blue-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .workspace { flex: 1; min-height: 0; display: flex; }
+
+  /* 横屏：左 70% 视频 / 右 30% 单词 */
+  @media (orientation: landscape) {
+    .workspace { flex-direction: row; }
+    .video-panel { flex: 0 0 70%; }
+    .word-panel { flex: 0 0 30%; }
+  }
+  /* 竖屏：上 50% 视频 / 下 50% 单词 */
+  @media (orientation: portrait) {
+    .workspace { flex-direction: column; }
+    .video-panel { flex: 0 0 50%; }
+    .word-panel { flex: 0 0 50%; }
+  }
+
+  .video-panel { display: flex; flex-direction: column; background: #10141c; min-height: 0; }
+  .video-tabs {
+    flex: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px;
+    background: #151a24;
+  }
+  .video-tabs button {
+    border: 0; background: #232a38; color: #9fb0c8;
+    font-size: 13px; font-weight: 600;
+    padding: 7px 14px; border-radius: 9px; cursor: pointer;
+  }
+  .video-tabs button.on { background: var(--blue); color: #fff; }
+  .video-wrap { flex: 1; min-height: 0; position: relative; display: flex; align-items: center; justify-content: center; }
+  #player { width: 100%; height: 100%; object-fit: contain; background: #000; display: block; }
+  .video-empty {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center;
+    color: #7d8aa3; font-size: 14px; text-align: center; padding: 20px; line-height: 1.8;
+  }
+
+  .word-panel { display: flex; flex-direction: column; background: var(--blue-bg); min-height: 0; }
+  .panel-title {
+    flex: none; display: flex; align-items: baseline; gap: 8px;
+    padding: 9px 12px 6px; font-size: 14px; font-weight: 700; color: var(--blue-dark);
+  }
+  .panel-title span { font-size: 11px; font-weight: 400; color: var(--sub); }
+  .word-list {
+    flex: 1; overflow-y: auto; padding: 8px 10px 14px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    align-content: start;
+  }
+  @media (min-width: 900px) and (orientation: landscape) { .word-list { grid-template-columns: repeat(3, 1fr); } }
+
+  .wcard {
+    background: #fff; border-radius: 12px; padding: 10px 8px 8px;
+    text-align: center; cursor: pointer; user-select: none;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 6px rgba(28, 79, 156, .07);
+    transition: transform .12s, border-color .12s, box-shadow .12s;
+  }
+  .wcard:active { transform: scale(.95); }
+  .wcard.speaking {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(47, 127, 224, .18);
+    background: #f2f8ff;
+  }
+  .wcard .w { font-size: 19px; font-weight: 700; color: var(--blue-dark); word-break: break-all; line-height: 1.3; }
+  .wcard .ipa { font-size: 12px; color: var(--sub); margin: 3px 0 5px; word-break: break-all; }
+  .wcard .pos {
+    display: inline-block; font-size: 10px; color: #fff;
+    background: #7fa8d9; border-radius: 8px; padding: 1px 7px; margin-bottom: 4px;
+  }
+  .wcard .mean { font-size: 13px; color: var(--ink); line-height: 1.4; }
+  .wcard .ext { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+  /* ===== Toast ===== */
+  #toast {
+    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%);
+    background: rgba(20, 28, 44, .92); color: #fff;
+    font-size: 13px; padding: 9px 18px; border-radius: 20px;
+    z-index: 99; opacity: 0; pointer-events: none;
+    transition: opacity .2s; max-width: 82%; text-align: center;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" aria-label="App 标志">英</div>
+  <div class="app-name">小学英语辅助</div>
+  <nav id="gradeNav"></nav>
+</header>
+
+<main>
+  <!-- 首页 -->
+  <section class="view on" id="view-home">
+    <div class="hero-logo">英</div>
+    <div class="hero-title">小学英语辅助</div>
+    <div class="hero-sub">外研版（新启航）一年级起点<br>点上方年级进入课程，横屏或竖屏均可使用</div>
+    <div class="hero-tip">点击单词即可听发音</div>
+  </section>
+
+  <!-- 年级页（单元列表） -->
+  <section class="view" id="view-grade">
+    <div class="grade-head">
+      <button class="back-btn" id="gradeBackBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        返回
+      </button>
+      <div class="grade-title" id="gradeTitle"></div>
+    </div>
+    <div class="grade-body" id="gradeBody"></div>
+  </section>
+
+  <!-- 课程页 -->
+  <section class="view" id="view-unit">
+    <div class="unit-head">
+      <button class="back-btn" id="backBtn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        返回
+      </button>
+      <div class="unit-title" id="unitTitle"></div>
+    </div>
+    <div class="workspace">
+      <div class="video-panel">
+        <div class="video-tabs" id="videoTabs"></div>
+        <div class="video-wrap">
+          <video id="player" controls playsinline preload="metadata"></video>
+          <div class="video-empty" id="videoEmpty">本单元为阅读拓展词，暂无视频</div>
+        </div>
+      </div>
+      <div class="word-panel">
+        <div class="panel-title" id="wordPanelTitle">本课单词 <span>点击朗读</span></div>
+        <div class="word-list" id="wordList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+/* ===== 单词数据（由构建脚本注入，勿手改） ===== */
+var WORDS_DATA = [{"id": 1, "grade": 1, "book": "上册", "title": "Unit 1 Hello! (你好！)", "words": [{"text": "hello", "ipa": "", "pos": "", "mean": "你好", "ext": "", "audio": "u1_hello.mp3", "spoken": "hello"}, {"text": "hi", "ipa": "", "pos": "", "mean": "你好", "ext": "", "audio": "u1_hi.mp3", "spoken": "hi"}, {"text": "nice", "ipa": "", "pos": "", "mean": "令人愉快的", "ext": "", "audio": "u1_nice.mp3", "spoken": "nice"}, {"text": "to", "ipa": "", "pos": "", "mean": "向，到", "ext": "", "audio": "u1_to.mp3", "spoken": "to"}, {"text": "meet", "ipa": "", "pos": "", "mean": "遇见", "ext": "", "audio": "u1_meet.mp3", "spoken": "meet"}, {"text": "you", "ipa": "", "pos": "", "mean": "你", "ext": "", "audio": "u1_you.mp3", "spoken": "you"}, {"text": "I", "ipa": "", "pos": "", "mean": "我", "ext": "", "audio": "u1_i.mp3", "spoken": "I"}, {"text": "my", "ipa": "", "pos": "", "mean": "我的", "ext": "", "audio": "u1_my.mp3", "spoken": "my"}, {"text": "name", "ipa": "", "pos": "", "mean": "名字", "ext": "", "audio": "u1_name.mp3", "spoken": "name"}, {"text": "let's", "ipa": "", "pos": "", "mean": "让我们", "ext": "", "audio": "u1_lets.mp3", "spoken": "let's"}, {"text": "play", "ipa": "", "pos": "", "mean": "玩", "ext": "", "audio": "u1_play.mp3", "spoken": "play"}, {"text": "friend", "ipa": "", "pos": "", "mean": "朋友", "ext": "", "audio": "u1_friend.mp3", "spoken": "friend"}]}, {"id": 2, "grade": 1, "book": "上册", "title": "Unit 2 Numbers (数字)", "words": [{"text": "one", "ipa": "", "pos": "", "mean": "一", "ext": "", "audio": "u2_one.mp3", "spoken": "one"}, {"text": "two", "ipa": "", "pos": "", "mean": "二", "ext": "", "audio": "u2_two.mp3", "spoken": "two"}, {"text": "three", "ipa": "", "pos": "", "mean": "三", "ext": "", "audio": "u2_three.mp3", "spoken": "three"}, {"text": "four", "ipa": "", "pos": "", "mean": "四", "ext": "", "audio": "u2_four.mp3", "spoken": "four"}, {"text": "five", "ipa": "", "pos": "", "mean": "五", "ext": "", "audio": "u2_five.mp3", "spoken": "five"}, {"text": "six", "ipa": "", "pos": "", "mean": "六", "ext": "", "audio": "u2_six.mp3", "spoken": "six"}, {"text": "little", "ipa": "", "pos": "", "mean": "小的", "ext": "", "audio": "u2_little.mp3", "spoken": "little"}, {"text": "bird", "ipa": "", "pos": "", "mean": "鸟", "ext": "", "audio": "u2_bird.mp3", "spoken": "bird"}, {"text": "in", "ipa": "", "pos": "", "mean": "在…里", "ext": "", "audio": "u2_in.mp3", "spoken": "in"}, {"text": "a / an", "ipa": "", "pos": "", "mean": "一/个", "ext": "", "audio": "u2_a_an.mp3", "spoken": "a an"}, {"text": "line", "ipa": "", "pos": "", "mean": "行, 排", "ext": "", "audio": "u2_line.mp3", "spoken": "line"}, {"text": "the", "ipa": "", "pos": "", "mean": "那/这", "ext": "", "audio": "u2_the.mp3", "spoken": "the"}, {"text": "sky", "ipa": "", "pos": "", "mean": "天空", "ext": "", "audio": "u2_sky.mp3", "spoken": "sky"}, {"text": "take", "ipa": "", "pos": "", "mean": "拍/摄", "ext": "", "audio": "u2_take.mp3", "spoken": "take"}, {"text": "photo", "ipa": "", "pos": "", "mean": "照片", "ext": "", "audio": "u2_photo.mp3", "spoken": "photo"}, {"text": "together", "ipa": "", "pos": "", "mean": "在一起", "ext": "", "audio": "u2_together.mp3", "spoken": "together"}]}, {"id": 3, "grade": 1, "book": "上册", "title": "Unit 3 Colours (颜色)", "words": [{"text": "red", "ipa": "", "pos": "", "mean": "红色", "ext": "", "audio": "u3_red.mp3", "spoken": "red"}, {"text": "yellow", "ipa": "", "pos": "", "mean": "黄色", "ext": "", "audio": "u3_yellow.mp3", "spoken": "yellow"}, {"text": "blue", "ipa": "", "pos": "", "mean": "蓝色", "ext": "", "audio": "u3_blue.mp3", "spoken": "blue"}, {"text": "green", "ipa": "", "pos": "", "mean": "绿色", "ext": "", "audio": "u3_green.mp3", "spoken": "green"}, {"text": "orange", "ipa": "", "pos": "", "mean": "橙色", "ext": "", "audio": "u3_orange.mp3", "spoken": "orange"}, {"text": "pink", "ipa": "", "pos": "", "mean": "粉色", "ext": "", "audio": "u3_pink.mp3", "spoken": "pink"}, {"text": "purple", "ipa": "", "pos": "", "mean": "紫色", "ext": "", "audio": "u3_purple.mp3", "spoken": "purple"}, {"text": "colour", "ipa": "", "pos": "", "mean": "颜色", "ext": "", "audio": "u3_colour.mp3", "spoken": "colour"}, {"text": "like", "ipa": "", "pos": "", "mean": "喜欢", "ext": "", "audio": "u3_like.mp3", "spoken": "like"}, {"text": "colourful", "ipa": "", "pos": "", "mean": "多彩的", "ext": "", "audio": "u3_colourful.mp3", "spoken": "colourful"}, {"text": "picture", "ipa": "", "pos": "", "mean": "图画", "ext": "", "audio": "u3_picture.mp3", "spoken": "picture"}, {"text": "what", "ipa": "", "pos": "", "mean": "什么", "ext": "", "audio": "u3_what.mp3", "spoken": "what"}, {"text": "it", "ipa": "", "pos": "", "mean": "它", "ext": "", "audio": "u3_it.mp3", "spoken": "it"}, {"text": "look", "ipa": "", "pos": "", "mean": "看", "ext": "", "audio": "u3_look.mp3", "spoken": "look"}, {"text": "hooray", "ipa": "", "pos": "", "mean": "好哇", "ext": "", "audio": "u3_hooray.mp3", "spoken": "hooray"}]}, {"id": 4, "grade": 1, "book": "上册", "title": "Unit 4 School things (学习用品)", "words": [{"text": "pencil", "ipa": "", "pos": "", "mean": "铅笔", "ext": "", "audio": "u4_pencil.mp3", "spoken": "pencil"}, {"text": "ruler", "ipa": "", "pos": "", "mean": "尺子", "ext": "", "audio": "u4_ruler.mp3", "spoken": "ruler"}, {"text": "eraser", "ipa": "", "pos": "", "mean": "橡皮", "ext": "", "audio": "u4_eraser.mp3", "spoken": "eraser"}, {"text": "book", "ipa": "", "pos": "", "mean": "书", "ext": "", "audio": "u4_book.mp3", "spoken": "book"}, {"text": "schoolbag", "ipa": "", "pos": "", "mean": "书包", "ext": "", "audio": "u4_schoolbag.mp3", "spoken": "schoolbag"}, {"text": "pencil case", "ipa": "", "pos": "", "mean": "铅笔盒", "ext": "", "audio": "u4_pencil_case.mp3", "spoken": "pencil case"}, {"text": "all", "ipa": "", "pos": "", "mean": "全部", "ext": "", "audio": "u4_all.mp3", "spoken": "all"}, {"text": "share", "ipa": "", "pos": "", "mean": "分享", "ext": "", "audio": "u4_share.mp3", "spoken": "share"}, {"text": "oh", "ipa": "", "pos": "", "mean": "哦/啊", "ext": "", "audio": "u4_oh.mp3", "spoken": "oh"}, {"text": "and", "ipa": "", "pos": "", "mean": "和", "ext": "", "audio": "u4_and.mp3", "spoken": "and"}, {"text": "English", "ipa": "", "pos": "", "mean": "英语", "ext": "", "audio": "u4_english.mp3", "spoken": "English"}, {"text": "don't", "ipa": "", "pos": "", "mean": "不要", "ext": "", "audio": "u4_dont.mp3", "spoken": "don't"}, {"text": "worry", "ipa": "", "pos": "", "mean": "担心", "ext": "", "audio": "u4_worry.mp3", "spoken": "worry"}, {"text": "here", "ipa": "", "pos": "", "mean": "这里/给你", "ext": "", "audio": "u4_here.mp3", "spoken": "here"}, {"text": "thank", "ipa": "", "pos": "", "mean": "感谢", "ext": "", "audio": "u4_thank.mp3", "spoken": "thank"}]}, {"id": 5, "grade": 1, "book": "上册", "title": "Unit 5 My classroom (我的教室)", "words": [{"text": "good morning", "ipa": "", "pos": "", "mean": "早上好", "ext": "", "audio": "u5_good_morning.mp3", "spoken": "good morning"}, {"text": "teacher", "ipa": "", "pos": "", "mean": "老师", "ext": "", "audio": "u5_teacher.mp3", "spoken": "teacher"}, {"text": "this", "ipa": "", "pos": "", "mean": "这个", "ext": "", "audio": "u5_this.mp3", "spoken": "this"}, {"text": "our", "ipa": "", "pos": "", "mean": "我们的", "ext": "", "audio": "u5_our.mp3", "spoken": "our"}, {"text": "classroom", "ipa": "", "pos": "", "mean": "教室", "ext": "", "audio": "u5_classroom.mp3", "spoken": "classroom"}, {"text": "blackboard", "ipa": "", "pos": "", "mean": "黑板", "ext": "", "audio": "u5_blackboard.mp3", "spoken": "blackboard"}, {"text": "desk", "ipa": "", "pos": "", "mean": "课桌", "ext": "", "audio": "u5_desk.mp3", "spoken": "desk"}, {"text": "chair", "ipa": "", "pos": "", "mean": "椅子", "ext": "", "audio": "u5_chair.mp3", "spoken": "chair"}, {"text": "window", "ipa": "", "pos": "", "mean": "窗户", "ext": "", "audio": "u5_window.mp3", "spoken": "window"}, {"text": "door", "ipa": "", "pos": "", "mean": "门", "ext": "", "audio": "u5_door.mp3", "spoken": "door"}, {"text": "floor", "ipa": "", "pos": "", "mean": "地板", "ext": "", "audio": "u5_floor.mp3", "spoken": "floor"}, {"text": "clean", "ipa": "", "pos": "", "mean": "打扫/干净的", "ext": "", "audio": "u5_clean.mp3", "spoken": "clean"}, {"text": "over", "ipa": "", "pos": "", "mean": "在...上面/结束", "ext": "", "audio": "u5_over.mp3", "spoken": "over"}]}, {"id": 6, "grade": 1, "book": "下册", "title": "Unit 1 Feelings (感觉)", "words": [{"text": "happy", "ipa": "", "pos": "", "mean": "高兴的", "ext": "", "audio": "u6_happy.mp3", "spoken": "happy"}, {"text": "sad", "ipa": "", "pos": "", "mean": "悲伤的", "ext": "", "audio": "u6_sad.mp3", "spoken": "sad"}, {"text": "hungry", "ipa": "", "pos": "", "mean": "饥饿的", "ext": "", "audio": "u6_hungry.mp3", "spoken": "hungry"}, {"text": "tired", "ipa": "", "pos": "", "mean": "疲倦的", "ext": "", "audio": "u6_tired.mp3", "spoken": "tired"}, {"text": "scared", "ipa": "", "pos": "", "mean": "害怕的", "ext": "", "audio": "u6_scared.mp3", "spoken": "scared"}, {"text": "sorry", "ipa": "", "pos": "", "mean": "抱歉的", "ext": "", "audio": "u6_sorry.mp3", "spoken": "sorry"}, {"text": "today", "ipa": "", "pos": "", "mean": "今天", "ext": "", "audio": "u6_today.mp3", "spoken": "today"}, {"text": "clap", "ipa": "", "pos": "", "mean": "拍手", "ext": "", "audio": "u6_clap.mp3", "spoken": "clap"}, {"text": "hand", "ipa": "", "pos": "", "mean": "手", "ext": "", "audio": "u6_hand.mp3", "spoken": "hand"}, {"text": "that", "ipa": "", "pos": "", "mean": "那个", "ext": "", "audio": "u6_that.mp3", "spoken": "that"}, {"text": "again", "ipa": "", "pos": "", "mean": "再一次", "ext": "", "audio": "u6_again.mp3", "spoken": "again"}, {"text": "dear", "ipa": "", "pos": "", "mean": "亲爱的", "ext": "", "audio": "u6_dear.mp3", "spoken": "dear"}, {"text": "please", "ipa": "", "pos": "", "mean": "请", "ext": "", "audio": "u6_please.mp3", "spoken": "please"}, {"text": "follow", "ipa": "", "pos": "", "mean": "跟随", "ext": "", "audio": "u6_follow.mp3", "spoken": "follow"}, {"text": "me", "ipa": "", "pos": "", "mean": "我，宾格", "ext": "", "audio": "u6_me.mp3", "spoken": "me"}, {"text": "walk", "ipa": "", "pos": "", "mean": "行走", "ext": "", "audio": "u6_walk.mp3", "spoken": "walk"}, {"text": "away", "ipa": "", "pos": "", "mean": "离开", "ext": "", "audio": "u6_away.mp3", "spoken": "away"}, {"text": "no", "ipa": "", "pos": "", "mean": "不", "ext": "", "audio": "u6_no.mp3", "spoken": "no"}, {"text": "mum", "ipa": "", "pos": "", "mean": "妈妈", "ext": "", "audio": "u6_mum.mp3", "spoken": "mum"}, {"text": "he", "ipa": "", "pos": "", "mean": "他", "ext": "", "audio": "u6_he.mp3", "spoken": "he"}, {"text": "too", "ipa": "", "pos": "", "mean": "也", "ext": "", "audio": "u6_too.mp3", "spoken": "too"}, {"text": "so", "ipa": "", "pos": "", "mean": "如此", "ext": "", "audio": "u6_so.mp3", "spoken": "so"}]}, {"id": 7, "grade": 1, "book": "下册", "title": "Unit 2 Family (家庭)", "words": [{"text": "Dad", "ipa": "", "pos": "", "mean": "爸爸", "ext": "", "audio": "u7_dad.mp3", "spoken": "Dad"}, {"text": "Mum", "ipa": "", "pos": "", "mean": "妈妈", "ext": "", "audio": "u7_mum.mp3", "spoken": "Mum"}, {"text": "Brother", "ipa": "", "pos": "", "mean": "兄弟", "ext": "", "audio": "u7_brother.mp3", "spoken": "Brother"}, {"text": "Sister", "ipa": "", "pos": "", "mean": "姐妹", "ext": "", "audio": "u7_sister.mp3", "spoken": "Sister"}, {"text": "Grandpa", "ipa": "", "pos": "", "mean": "爷爷/外公", "ext": "", "audio": "u7_grandpa.mp3", "spoken": "Grandpa"}, {"text": "Grandma", "ipa": "", "pos": "", "mean": "奶奶/外婆", "ext": "", "audio": "u7_grandma.mp3", "spoken": "Grandma"}, {"text": "Family", "ipa": "", "pos": "", "mean": "家庭", "ext": "", "audio": "u7_family.mp3", "spoken": "Family"}, {"text": "Love", "ipa": "", "pos": "", "mean": "爱", "ext": "", "audio": "u7_love.mp3", "spoken": "Love"}, {"text": "Birthday", "ipa": "", "pos": "", "mean": "生日", "ext": "", "audio": "u7_birthday.mp3", "spoken": "Birthday"}]}, {"id": 8, "grade": 1, "book": "下册", "title": "Unit 3 Animals (动物)", "words": [{"text": "cat", "ipa": "", "pos": "", "mean": "猫", "ext": "", "audio": "u8_cat.mp3", "spoken": "cat"}, {"text": "dog", "ipa": "", "pos": "", "mean": "狗", "ext": "", "audio": "u8_dog.mp3", "spoken": "dog"}, {"text": "bird", "ipa": "", "pos": "", "mean": "鸟", "ext": "", "audio": "u8_bird.mp3", "spoken": "bird"}, {"text": "panda", "ipa": "", "pos": "", "mean": "熊猫", "ext": "", "audio": "u8_panda.mp3", "spoken": "panda"}, {"text": "tiger", "ipa": "", "pos": "", "mean": "老虎", "ext": "", "audio": "u8_tiger.mp3", "spoken": "tiger"}, {"text": "monkey", "ipa": "", "pos": "", "mean": "猴子", "ext": "", "audio": "u8_monkey.mp3", "spoken": "monkey"}, {"text": "elephant", "ipa": "", "pos": "", "mean": "大象", "ext": "", "audio": "u8_elephant.mp3", "spoken": "elephant"}, {"text": "zoo", "ipa": "", "pos": "", "mean": "动物园", "ext": "", "audio": "u8_zoo.mp3", "spoken": "zoo"}]}, {"id": 9, "grade": 1, "book": "下册", "title": "Unit 4 At the farm (在农场)", "words": [{"text": "seven", "ipa": "", "pos": "", "mean": "七", "ext": "", "audio": "u9_seven.mp3", "spoken": "seven"}, {"text": "eight", "ipa": "", "pos": "", "mean": "八", "ext": "", "audio": "u9_eight.mp3", "spoken": "eight"}, {"text": "nine", "ipa": "", "pos": "", "mean": "九", "ext": "", "audio": "u9_nine.mp3", "spoken": "nine"}, {"text": "ten", "ipa": "", "pos": "", "mean": "十", "ext": "", "audio": "u9_ten.mp3", "spoken": "ten"}, {"text": "eleven", "ipa": "", "pos": "", "mean": "十一", "ext": "", "audio": "u9_eleven.mp3", "spoken": "eleven"}, {"text": "twelve", "ipa": "", "pos": "", "mean": "十二", "ext": "", "audio": "u9_twelve.mp3", "spoken": "twelve"}, {"text": "count", "ipa": "", "pos": "", "mean": "数数", "ext": "", "audio": "u9_count.mp3", "spoken": "count"}, {"text": "at", "ipa": "", "pos": "", "mean": "在", "ext": "", "audio": "u9_at.mp3", "spoken": "at"}, {"text": "farm", "ipa": "", "pos": "", "mean": "农场", "ext": "", "audio": "u9_farm.mp3", "spoken": "farm"}, {"text": "welcome", "ipa": "", "pos": "", "mean": "欢迎", "ext": "", "audio": "u9_welcome.mp3", "spoken": "welcome"}, {"text": "great", "ipa": "", "pos": "", "mean": "极好的", "ext": "", "audio": "u9_great.mp3", "spoken": "great"}, {"text": "see", "ipa": "", "pos": "", "mean": "看见；明白", "ext": "", "audio": "u9_see.mp3", "spoken": "see"}, {"text": "o'clock", "ipa": "", "pos": "", "mean": "……点钟", "ext": "", "audio": "u9_oclock.mp3", "spoken": "o'clock"}, {"text": "time", "ipa": "", "pos": "", "mean": "时间", "ext": "", "audio": "u9_time.mp3", "spoken": "time"}, {"text": "get", "ipa": "", "pos": "", "mean": "得到；变得", "ext": "", "audio": "u9_get.mp3", "spoken": "get"}, {"text": "get up", "ipa": "", "pos": "", "mean": "起床", "ext": "", "audio": "u9_get_up.mp3", "spoken": "get up"}, {"text": "children", "ipa": "", "pos": "", "mean": "孩子们", "ext": "", "audio": "u9_children.mp3", "spoken": "children"}, {"text": "breakfast", "ipa": "", "pos": "", "mean": "早餐", "ext": "", "audio": "u9_breakfast.mp3", "spoken": "breakfast"}, {"text": "yummy", "ipa": "", "pos": "", "mean": "美味的", "ext": "", "audio": "u9_yummy.mp3", "spoken": "yummy"}, {"text": "work", "ipa": "", "pos": "", "mean": "工作", "ext": "", "audio": "u9_work.mp3", "spoken": "work"}, {"text": "how", "ipa": "", "pos": "", "mean": "多少；多么", "ext": "", "audio": "u9_how.mp3", "spoken": "how"}, {"text": "how many", "ipa": "", "pos": "", "mean": "多少", "ext": "", "audio": "u9_how_many.mp3", "spoken": "how many"}, {"text": "cow", "ipa": "", "pos": "", "mean": "奶牛", "ext": "", "audio": "u9_cow.mp3", "spoken": "cow"}, {"text": "egg", "ipa": "", "pos": "", "mean": "鸡蛋", "ext": "", "audio": "u9_egg.mp3", "spoken": "egg"}, {"text": "back", "ipa": "", "pos": "", "mean": "回到原处", "ext": "", "audio": "u9_back.mp3", "spoken": "back"}, {"text": "home", "ipa": "", "pos": "", "mean": "家", "ext": "", "audio": "u9_home.mp3", "spoken": "home"}]}, {"id": 10, "grade": 1, "book": "下册", "title": "Unit 5 My room (我的房间)", "words": [{"text": "bear", "ipa": "", "pos": "", "mean": "熊", "ext": "", "audio": "u10_bear.mp3", "spoken": "bear"}, {"text": "where", "ipa": "", "pos": "", "mean": "哪里", "ext": "", "audio": "u10_where.mp3", "spoken": "where"}, {"text": "room", "ipa": "", "pos": "", "mean": "空间；房间", "ext": "", "audio": "u10_room.mp3", "spoken": "room"}, {"text": "living room", "ipa": "", "pos": "", "mean": "起居室", "ext": "", "audio": "u10_living_room.mp3", "spoken": "living room"}, {"text": "yes", "ipa": "", "pos": "", "mean": "是的", "ext": "", "audio": "u10_yes.mp3", "spoken": "yes"}, {"text": "on", "ipa": "", "pos": "", "mean": "在……上面", "ext": "", "audio": "u10_on.mp3", "spoken": "on"}, {"text": "table", "ipa": "", "pos": "", "mean": "桌子", "ext": "", "audio": "u10_table.mp3", "spoken": "table"}, {"text": "under", "ipa": "", "pos": "", "mean": "在……下面", "ext": "", "audio": "u10_under.mp3", "spoken": "under"}, {"text": "sofa", "ipa": "", "pos": "", "mean": "沙发", "ext": "", "audio": "u10_sofa.mp3", "spoken": "sofa"}, {"text": "need", "ipa": "", "pos": "", "mean": "需要", "ext": "", "audio": "u10_need.mp3", "spoken": "need"}, {"text": "water", "ipa": "", "pos": "", "mean": "水", "ext": "", "audio": "u10_water.mp3", "spoken": "water"}, {"text": "bottle", "ipa": "", "pos": "", "mean": "瓶子", "ext": "", "audio": "u10_bottle.mp3", "spoken": "bottle"}, {"text": "there", "ipa": "", "pos": "", "mean": "在那里", "ext": "", "audio": "u10_there.mp3", "spoken": "there"}, {"text": "your", "ipa": "", "pos": "", "mean": "你的，你们的", "ext": "", "audio": "u10_your.mp3", "spoken": "your"}, {"text": "behind", "ipa": "", "pos": "", "mean": "在……后面", "ext": "", "audio": "u10_behind.mp3", "spoken": "behind"}, {"text": "bed", "ipa": "", "pos": "", "mean": "床", "ext": "", "audio": "u10_bed.mp3", "spoken": "bed"}]}, {"id": 11, "grade": 2, "book": "上册", "title": "Unit 1 Face (脸)", "words": [{"text": "eye", "ipa": "", "pos": "", "mean": "眼睛", "ext": "", "audio": "u11_eye.mp3", "spoken": "eye"}, {"text": "face", "ipa": "", "pos": "", "mean": "脸", "ext": "", "audio": "u11_face.mp3", "spoken": "face"}, {"text": "mouth", "ipa": "", "pos": "", "mean": "嘴", "ext": "", "audio": "u11_mouth.mp3", "spoken": "mouth"}, {"text": "nose", "ipa": "", "pos": "", "mean": "鼻子", "ext": "", "audio": "u11_nose.mp3", "spoken": "nose"}, {"text": "snowman", "ipa": "", "pos": "", "mean": "雪人", "ext": "", "audio": "u11_snowman.mp3", "spoken": "snowman"}, {"text": "twin", "ipa": "", "pos": "", "mean": "双胞胎之一", "ext": "", "audio": "u11_twin.mp3", "spoken": "twin"}, {"text": "hair", "ipa": "", "pos": "", "mean": "头发", "ext": "", "audio": "u11_hair.mp3", "spoken": "hair"}, {"text": "big", "ipa": "", "pos": "", "mean": "大的", "ext": "", "audio": "u11_big.mp3", "spoken": "big"}, {"text": "small", "ipa": "", "pos": "", "mean": "小的", "ext": "", "audio": "u11_small.mp3", "spoken": "small"}, {"text": "long", "ipa": "", "pos": "", "mean": "长的", "ext": "", "audio": "u11_long.mp3", "spoken": "long"}, {"text": "short", "ipa": "", "pos": "", "mean": "短的；矮的", "ext": "", "audio": "u11_short.mp3", "spoken": "short"}, {"text": "same", "ipa": "", "pos": "", "mean": "相同的", "ext": "", "audio": "u11_same.mp3", "spoken": "same"}, {"text": "different", "ipa": "", "pos": "", "mean": "不同的", "ext": "", "audio": "u11_different.mp3", "spoken": "different"}, {"text": "people", "ipa": "", "pos": "", "mean": "人们", "ext": "", "audio": "u11_people.mp3", "spoken": "people"}, {"text": "often", "ipa": "", "pos": "", "mean": "经常", "ext": "", "audio": "u11_often.mp3", "spoken": "often"}, {"text": "wrong", "ipa": "", "pos": "", "mean": "错误的", "ext": "", "audio": "u11_wrong.mp3", "spoken": "wrong"}, {"text": "idea", "ipa": "", "pos": "", "mean": "主意；想法", "ext": "", "audio": "u11_idea.mp3", "spoken": "idea"}]}, {"id": 12, "grade": 2, "book": "上册", "title": "Unit 2 Body parts (身体部位)", "words": [{"text": "head", "ipa": "", "pos": "", "mean": "头", "ext": "", "audio": "u12_head.mp3", "spoken": "head"}, {"text": "neck", "ipa": "", "pos": "", "mean": "脖子", "ext": "", "audio": "u12_neck.mp3", "spoken": "neck"}, {"text": "arm", "ipa": "", "pos": "", "mean": "胳膊", "ext": "", "audio": "u12_arm.mp3", "spoken": "arm"}, {"text": "body", "ipa": "", "pos": "", "mean": "身体", "ext": "", "audio": "u12_body.mp3", "spoken": "body"}, {"text": "leg", "ipa": "", "pos": "", "mean": "腿", "ext": "", "audio": "u12_leg.mp3", "spoken": "leg"}, {"text": "put", "ipa": "", "pos": "", "mean": "放；安放", "ext": "", "audio": "u12_put.mp3", "spoken": "put"}]}, {"id": 13, "grade": 2, "book": "上册", "title": "Unit 3 Animals (动物)", "words": [{"text": "zoo", "ipa": "", "pos": "", "mean": "动物园", "ext": "", "audio": "u13_zoo.mp3", "spoken": "zoo"}, {"text": "tiger", "ipa": "", "pos": "", "mean": "老虎", "ext": "", "audio": "u13_tiger.mp3", "spoken": "tiger"}, {"text": "fox", "ipa": "", "pos": "", "mean": "狐狸", "ext": "", "audio": "u13_fox.mp3", "spoken": "fox"}, {"text": "monkey", "ipa": "", "pos": "", "mean": "猴子", "ext": "", "audio": "u13_monkey.mp3", "spoken": "monkey"}, {"text": "deer", "ipa": "", "pos": "", "mean": "鹿", "ext": "", "audio": "u13_deer.mp3", "spoken": "deer"}, {"text": "bird", "ipa": "", "pos": "", "mean": "鸟", "ext": "", "audio": "u13_bird.mp3", "spoken": "bird"}, {"text": "rabbit", "ipa": "", "pos": "", "mean": "兔子", "ext": "", "audio": "u13_rabbit.mp3", "spoken": "rabbit"}, {"text": "hungry", "ipa": "", "pos": "", "mean": "饥饿的", "ext": "", "audio": "u13_hungry.mp3", "spoken": "hungry"}, {"text": "king (of animals)", "ipa": "", "pos": "", "mean": "（动物）之王", "ext": "", "audio": "u13_king_of_animals.mp3", "spoken": "king of animals"}, {"text": "eat", "ipa": "", "pos": "", "mean": "吃", "ext": "", "audio": "u13_eat.mp3", "spoken": "eat"}, {"text": "run (away)", "ipa": "", "pos": "", "mean": "跑（开）", "ext": "", "audio": "u13_run_away.mp3", "spoken": "run away"}, {"text": "fly (away)", "ipa": "", "pos": "", "mean": "飞（走）", "ext": "", "audio": "u13_fly_away.mp3", "spoken": "fly away"}, {"text": "show", "ipa": "", "pos": "", "mean": "展示；演出", "ext": "", "audio": "u13_show.mp3", "spoken": "show"}, {"text": "go", "ipa": "", "pos": "", "mean": "去；走", "ext": "", "audio": "u13_go.mp3", "spoken": "go"}]}, {"id": 14, "grade": 2, "book": "上册", "title": "Unit 4 Food (食物)", "words": [{"text": "apple", "ipa": "", "pos": "", "mean": "苹果", "ext": "", "audio": "u14_apple.mp3", "spoken": "apple"}, {"text": "banana", "ipa": "", "pos": "", "mean": "香蕉", "ext": "", "audio": "u14_banana.mp3", "spoken": "banana"}, {"text": "milk", "ipa": "", "pos": "", "mean": "牛奶", "ext": "", "audio": "u14_milk.mp3", "spoken": "milk"}, {"text": "bread", "ipa": "", "pos": "", "mean": "面包", "ext": "", "audio": "u14_bread.mp3", "spoken": "bread"}, {"text": "meat", "ipa": "", "pos": "", "mean": "肉", "ext": "", "audio": "u14_meat.mp3", "spoken": "meat"}, {"text": "food", "ipa": "", "pos": "", "mean": "食物", "ext": "", "audio": "u14_food.mp3", "spoken": "food"}, {"text": "candy", "ipa": "", "pos": "", "mean": "糖果", "ext": "", "audio": "u14_candy.mp3", "spoken": "candy"}, {"text": "shopping list", "ipa": "", "pos": "", "mean": "购物清单", "ext": "", "audio": "u14_shopping_list.mp3", "spoken": "shopping list"}, {"text": "picnic day", "ipa": "", "pos": "", "mean": "野餐日", "ext": "", "audio": "u14_picnic_day.mp3", "spoken": "picnic day"}]}, {"id": 15, "grade": 2, "book": "上册", "title": "Unit 5 Festival (节日)", "words": [{"text": "festival", "ipa": "", "pos": "", "mean": "节日", "ext": "", "audio": "u15_festival.mp3", "spoken": "festival"}, {"text": "Spring Festival", "ipa": "", "pos": "", "mean": "春节", "ext": "", "audio": "u15_spring_festival.mp3", "spoken": "Spring Festival"}, {"text": "New Year", "ipa": "", "pos": "", "mean": "新年", "ext": "", "audio": "u15_new_year.mp3", "spoken": "New Year"}, {"text": "lantern", "ipa": "", "pos": "", "mean": "灯笼", "ext": "", "audio": "u15_lantern.mp3", "spoken": "lantern"}, {"text": "paper-cut", "ipa": "", "pos": "", "mean": "剪纸", "ext": "", "audio": "u15_papercut.mp3", "spoken": "paper-cut"}, {"text": "celebrate", "ipa": "", "pos": "", "mean": "庆祝", "ext": "", "audio": "u15_celebrate.mp3", "spoken": "celebrate"}, {"text": "wear (clothes)", "ipa": "", "pos": "", "mean": "穿（衣服）", "ext": "", "audio": "u15_wear_clothes.mp3", "spoken": "wear clothes"}, {"text": "mean", "ipa": "", "pos": "", "mean": "意思是；意味着", "ext": "", "audio": "u15_mean.mp3", "spoken": "mean"}, {"text": "wish", "ipa": "", "pos": "", "mean": "愿望；祝愿", "ext": "", "audio": "u15_wish.mp3", "spoken": "wish"}, {"text": "luck", "ipa": "", "pos": "", "mean": "运气", "ext": "", "audio": "u15_luck.mp3", "spoken": "luck"}, {"text": "lucky", "ipa": "", "pos": "", "mean": "幸运的", "ext": "", "audio": "u15_lucky.mp3", "spoken": "lucky"}, {"text": "beautiful", "ipa": "", "pos": "", "mean": "美丽的", "ext": "", "audio": "u15_beautiful.mp3", "spoken": "beautiful"}, {"text": "interesting", "ipa": "", "pos": "", "mean": "有趣的", "ext": "", "audio": "u15_interesting.mp3", "spoken": "interesting"}, {"text": "these", "ipa": "", "pos": "", "mean": "这些", "ext": "", "audio": "u15_these.mp3", "spoken": "these"}, {"text": "some", "ipa": "", "pos": "", "mean": "一些", "ext": "", "audio": "u15_some.mp3", "spoken": "some"}]}, {"id": 16, "grade": 2, "book": "下册", "title": "Unit 1 Abilities (能力)", "words": [{"text": "sing", "ipa": "", "pos": "", "mean": "唱；唱歌", "ext": "", "audio": "u16_sing.mp3", "spoken": "sing"}, {"text": "dance", "ipa": "", "pos": "", "mean": "舞蹈", "ext": "", "audio": "u16_dance.mp3", "spoken": "dance"}, {"text": "swim", "ipa": "", "pos": "", "mean": "游泳", "ext": "", "audio": "u16_swim.mp3", "spoken": "swim"}, {"text": "draw", "ipa": "", "pos": "", "mean": "画；描绘", "ext": "", "audio": "u16_draw.mp3", "spoken": "draw"}, {"text": "football", "ipa": "", "pos": "", "mean": "足球（运动）", "ext": "", "audio": "u16_football.mp3", "spoken": "football"}, {"text": "robot", "ipa": "", "pos": "", "mean": "机器人", "ext": "", "audio": "u16_robot.mp3", "spoken": "robot"}, {"text": "watch", "ipa": "", "pos": "", "mean": "当心；留意", "ext": "", "audio": "u16_watch.mp3", "spoken": "watch"}, {"text": "super", "ipa": "", "pos": "", "mean": "超级的；特别", "ext": "", "audio": "u16_super.mp3", "spoken": "super"}, {"text": "very", "ipa": "", "pos": "", "mean": "很；非常", "ext": "", "audio": "u16_very.mp3", "spoken": "very"}, {"text": "well", "ipa": "", "pos": "", "mean": "熟练地；令人满意地", "ext": "", "audio": "u16_well.mp3", "spoken": "well"}]}, {"id": 17, "grade": 2, "book": "下册", "title": "Unit 2 Seasons (季节)", "words": [{"text": "spring", "ipa": "", "pos": "", "mean": "春天", "ext": "", "audio": "u17_spring.mp3", "spoken": "spring"}, {"text": "summer", "ipa": "", "pos": "", "mean": "夏天", "ext": "", "audio": "u17_summer.mp3", "spoken": "summer"}, {"text": "autumn", "ipa": "", "pos": "", "mean": "秋天", "ext": "", "audio": "u17_autumn.mp3", "spoken": "autumn"}, {"text": "winter", "ipa": "", "pos": "", "mean": "冬天", "ext": "", "audio": "u17_winter.mp3", "spoken": "winter"}, {"text": "warm", "ipa": "", "pos": "", "mean": "温暖的；暖和的", "ext": "", "audio": "u17_warm.mp3", "spoken": "warm"}, {"text": "hot", "ipa": "", "pos": "", "mean": "热的；炎热的", "ext": "", "audio": "u17_hot.mp3", "spoken": "hot"}, {"text": "cool", "ipa": "", "pos": "", "mean": "凉的；凉爽的", "ext": "", "audio": "u17_cool.mp3", "spoken": "cool"}, {"text": "cold", "ipa": "", "pos": "", "mean": "冷的；寒冷的", "ext": "", "audio": "u17_cold.mp3", "spoken": "cold"}, {"text": "seed", "ipa": "", "pos": "", "mean": "种子", "ext": "", "audio": "u17_seed.mp3", "spoken": "seed"}]}, {"id": 18, "grade": 2, "book": "下册", "title": "Unit 3 Clothes (衣服)", "words": [{"text": "Chinese", "ipa": "", "pos": "", "mean": "中国的", "ext": "", "audio": "u18_chinese.mp3", "spoken": "Chinese"}, {"text": "make", "ipa": "", "pos": "", "mean": "制作；做", "ext": "", "audio": "u18_make.mp3", "spoken": "make"}, {"text": "old", "ipa": "", "pos": "", "mean": "……岁的；老的；旧的", "ext": "", "audio": "u18_old.mp3", "spoken": "old"}, {"text": "give", "ipa": "", "pos": "", "mean": "给；送", "ext": "", "audio": "u18_give.mp3", "spoken": "give"}, {"text": "dress", "ipa": "", "pos": "", "mean": "连衣裙", "ext": "", "audio": "u18_dress.mp3", "spoken": "dress"}, {"text": "coat", "ipa": "", "pos": "", "mean": "外衣；大衣；外套", "ext": "", "audio": "u18_coat.mp3", "spoken": "coat"}, {"text": "skirt", "ipa": "", "pos": "", "mean": "女裙；裙子", "ext": "", "audio": "u18_skirt.mp3", "spoken": "skirt"}, {"text": "shirt", "ipa": "", "pos": "", "mean": "衬衫", "ext": "", "audio": "u18_shirt.mp3", "spoken": "shirt"}, {"text": "T-shirt", "ipa": "", "pos": "", "mean": "T恤衫", "ext": "", "audio": "u18_tshirt.mp3", "spoken": "T-shirt"}, {"text": "shorts", "ipa": "", "pos": "", "mean": "短裤", "ext": "", "audio": "u18_shorts.mp3", "spoken": "shorts"}, {"text": "trousers", "ipa": "", "pos": "", "mean": "裤子；长裤", "ext": "", "audio": "u18_trousers.mp3", "spoken": "trousers"}, {"text": "think", "ipa": "", "pos": "", "mean": "想；觉得", "ext": "", "audio": "u18_think.mp3", "spoken": "think"}]}, {"id": 19, "grade": 2, "book": "下册", "title": "Unit 4 School subjects (课程)", "words": [{"text": "Chinese", "ipa": "", "pos": "", "mean": "语文", "ext": "", "audio": "u19_chinese.mp3", "spoken": "Chinese"}, {"text": "English", "ipa": "", "pos": "", "mean": "英语", "ext": "", "audio": "u19_english.mp3", "spoken": "English"}, {"text": "maths", "ipa": "", "pos": "", "mean": "数学", "ext": "", "audio": "u19_maths.mp3", "spoken": "maths"}, {"text": "PE", "ipa": "", "pos": "", "mean": "体育", "ext": "", "audio": "u19_pe.mp3", "spoken": "PE"}, {"text": "Art", "ipa": "", "pos": "", "mean": "美术，艺术", "ext": "", "audio": "u19_art.mp3", "spoken": "Art"}, {"text": "Music", "ipa": "", "pos": "", "mean": "音乐", "ext": "", "audio": "u19_music.mp3", "spoken": "Music"}, {"text": "easy", "ipa": "", "pos": "", "mean": "容易的；简单的", "ext": "", "audio": "u19_easy.mp3", "spoken": "easy"}, {"text": "hard", "ipa": "", "pos": "", "mean": "困难的；费劲的", "ext": "", "audio": "u19_hard.mp3", "spoken": "hard"}, {"text": "help", "ipa": "", "pos": "", "mean": "帮助，帮忙", "ext": "", "audio": "u19_help.mp3", "spoken": "help"}, {"text": "try", "ipa": "", "pos": "", "mean": "试；尝试", "ext": "", "audio": "u19_try.mp3", "spoken": "try"}, {"text": "really", "ipa": "", "pos": "", "mean": "十分，非常", "ext": "", "audio": "u19_really.mp3", "spoken": "really"}, {"text": "but", "ipa": "", "pos": "", "mean": "但是，然而", "ext": "", "audio": "u19_but.mp3", "spoken": "but"}, {"text": "timetable", "ipa": "", "pos": "", "mean": "课程表，时间表", "ext": "", "audio": "u19_timetable.mp3", "spoken": "timetable"}]}, {"id": 20, "grade": 2, "book": "下册", "title": "Unit 5 My week (我的一周)", "words": [{"text": "Monday", "ipa": "", "pos": "", "mean": "星期一", "ext": "", "audio": "u20_monday.mp3", "spoken": "Monday"}, {"text": "Tuesday", "ipa": "", "pos": "", "mean": "星期二", "ext": "", "audio": "u20_tuesday.mp3", "spoken": "Tuesday"}, {"text": "Wednesday", "ipa": "", "pos": "", "mean": "星期三", "ext": "", "audio": "u20_wednesday.mp3", "spoken": "Wednesday"}, {"text": "Thursday", "ipa": "", "pos": "", "mean": "星期四", "ext": "", "audio": "u20_thursday.mp3", "spoken": "Thursday"}, {"text": "Friday", "ipa": "", "pos": "", "mean": "星期五", "ext": "", "audio": "u20_friday.mp3", "spoken": "Friday"}, {"text": "Saturday", "ipa": "", "pos": "", "mean": "星期六", "ext": "", "audio": "u20_saturday.mp3", "spoken": "Saturday"}, {"text": "Sunday", "ipa": "", "pos": "", "mean": "星期日", "ext": "", "audio": "u20_sunday.mp3", "spoken": "Sunday"}, {"text": "learn", "ipa": "", "pos": "", "mean": "学习；学会", "ext": "", "audio": "u20_learn.mp3", "spoken": "learn"}, {"text": "rain", "ipa": "", "pos": "", "mean": "雨", "ext": "", "audio": "u20_rain.mp3", "spoken": "rain"}, {"text": "outside", "ipa": "", "pos": "", "mean": "在户外；在外面", "ext": "", "audio": "u20_outside.mp3", "spoken": "outside"}, {"text": "week", "ipa": "", "pos": "", "mean": "星期；周", "ext": "", "audio": "u20_week.mp3", "spoken": "week"}, {"text": "wait", "ipa": "", "pos": "", "mean": "等待；等候", "ext": "", "audio": "u20_wait.mp3", "spoken": "wait"}]}];
+
+/* ===== 视频映射：单元id -> { key: {file, label} } =====
+   chant/read 基础视频；ext/words/dialog/topic 为各册拓展视频 */
+var VIDEO_MAP = {
+  1: { chant: { file: "u1_chant.mp4", label: "Let's chant" }, read: { file: "u1_read.mp4", label: "Let's read" } },
+  2: {
+    chant: { file: "u2_chant.mp4", label: "Let's chant" },
+    read: { file: "u2_read.mp4", label: "Let's read" },
+    ext: { file: "u2_ext.mp4", label: "One little finger" }
+  },
+  3: {
+    chant: { file: "u3_chant.mp4", label: "Let's chant" },
+    read: { file: "u3_read.mp4", label: "Let's read" },
+    ext: { file: "u3_ext.mp4", label: "I See Something Blue" }
+  },
+  4: { chant: { file: "u4_chant.mp4", label: "Let's chant" }, read: { file: "u4_read.mp4", label: "Let's read" } },
+  5: { chant: { file: "u5_chant.mp4", label: "Let's chant" }, read: { file: "u5_read.mp4", label: "Let's read" } },
+  6: {
+    chant: { file: "u6_chant.mp4", label: "Let's chant" },
+    read: { file: "u6_read.mp4", label: "Let's read" },
+    words: { file: "u6_words.mp4", label: "拓展词汇" },
+    dialog: { file: "u6_dialog.mp4", label: "拓展对话" }
+  },
+  7: {
+    chant: { file: "u7_chant.mp4", label: "Let's chant" },
+    read: { file: "u7_read.mp4", label: "Let's read" },
+    words: { file: "u7_words.mp4", label: "拓展词汇" },
+    dialog: { file: "u7_dialog.mp4", label: "拓展对话" }
+  },
+  8: {
+    chant: { file: "u8_chant.mp4", label: "Let's chant" },
+    read: { file: "u8_read.mp4", label: "Let's read" },
+    words: { file: "u8_words.mp4", label: "拓展词汇" },
+    dialog: { file: "u8_dialog.mp4", label: "拓展对话" }
+  },
+  9: {
+    chant: { file: "u9_chant.mp4", label: "Let's chant" },
+    read: { file: "u9_read.mp4", label: "Let's read" },
+    words: { file: "u9_words.mp4", label: "拓展词汇" },
+    dialog: { file: "u9_dialog.mp4", label: "拓展对话" }
+  },
+  10: {
+    chant: { file: "u10_chant.mp4", label: "Let's chant" },
+    read: { file: "u10_read.mp4", label: "Let's read" },
+    words: { file: "u10_words.mp4", label: "拓展词汇" },
+    dialog: { file: "u10_dialog.mp4", label: "拓展对话" }
+  },
+  11: { chant: { file: "u11_chant.mp4", label: "Let's chant" }, topic: { file: "u11_topic.mp4", label: "We look same" } },
+  12: { chant: { file: "u12_chant.mp4", label: "Let's chant" }, topic: { file: "u12_topic.mp4", label: "Who I am" } },
+  13: { chant: { file: "u13_chant.mp4", label: "Let's chant" }, topic: { file: "u13_topic.mp4", label: "Fox and tiger" } },
+  14: { chant: { file: "u14_chant.mp4", label: "Let's chant" }, topic: { file: "u14_topic.mp4", label: "Picnic day" } },
+  15: { chant: { file: "u15_chant.mp4", label: "Let's chant" }, topic: { file: "u15_topic.mp4", label: "A happy festival" } },
+  16: { chant: { file: "u16_chant.mp4", label: "Let's chant" }, read: { file: "u16_read.mp4", label: "Let's read" } },
+  17: { chant: { file: "u17_chant.mp4", label: "Let's chant" }, read: { file: "u17_read.mp4", label: "Let's read" } },
+  18: { chant: { file: "u18_chant.mp4", label: "Let's chant" }, read: { file: "u18_read.mp4", label: "Let's read" } },
+  19: { chant: { file: "u19_chant.mp4", label: "Let's chant" }, read: { file: "u19_read.mp4", label: "Let's read" } },
+  20: { chant: { file: "u20_chant.mp4", label: "Let's chant" }, read: { file: "u20_read.mp4", label: "Let's read" } }
+};
+
+var GRADE_NAMES = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级"];
+var AVAILABLE_GRADES = [1, 2]; // 当前有一、二年级内容
+
+/* 年级 -> 册 -> 单元id列表（后续添加新内容时在此登记） */
+var GRADE_BOOKS = {
+  1: [
+    { name: "上册", units: [1, 2, 3, 4, 5] },
+    { name: "下册", units: [6, 7, 8, 9, 10] }
+  ],
+  2: [
+    { name: "上册", units: [11, 12, 13, 14, 15] },
+    { name: "下册", units: [16, 17, 18, 19, 20] }
+  ]
+};
+
+var currentGrade = null;
+var currentUnitId = null;
+var currentVideoKey = "chant";
+var currentAudio = null;
+var speakingCard = null;
+var toastTimer = null;
+
+/* ===== 元素引用 ===== */
+var nav = document.getElementById("gradeNav");
+var viewHome = document.getElementById("view-home");
+var viewGrade = document.getElementById("view-grade");
+var viewUnit = document.getElementById("view-unit");
+var gradeTitle = document.getElementById("gradeTitle");
+var gradeBody = document.getElementById("gradeBody");
+var player = document.getElementById("player");
+var videoEmpty = document.getElementById("videoEmpty");
+var videoTabs = document.getElementById("videoTabs");
+var unitTitle = document.getElementById("unitTitle");
+var wordList = document.getElementById("wordList");
+var wordPanelTitle = document.getElementById("wordPanelTitle");
+var toastEl = document.getElementById("toast");
+
+/* ===== Toast ===== */
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
+}
+
+/* ===== 导航栏 ===== */
+function buildNav() {
+  nav.innerHTML = "";
+  GRADE_NAMES.forEach(function (name, i) {
+    var btn = document.createElement("button");
+    btn.textContent = name;
+    btn.dataset.grade = String(i + 1);
+    btn.addEventListener("click", function () {
+      var g = parseInt(btn.dataset.grade, 10);
+      if (AVAILABLE_GRADES.indexOf(g) === -1) {
+        toast(name + "内容即将上线");
+        return;
+      }
+      location.hash = "#/grade/" + g;
+    });
+    nav.appendChild(btn);
+  });
+}
+function markNav(grade) {
+  var btns = nav.querySelectorAll("button");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle("on", parseInt(btns[i].dataset.grade, 10) === grade);
+  }
+}
+
+/* ===== 单词渲染 ===== */
+function esc(s) {
+  var d = document.createElement("div");
+  d.textContent = s == null ? "" : String(s);
+  return d.innerHTML;
+}
+
+function renderWords(unit) {
+  wordList.innerHTML = "";
+  unit.words.forEach(function (w) {
+    var card = document.createElement("div");
+    card.className = "wcard";
+    card.dataset.audio = "media/audio/" + w.audio;
+    var html =
+      '<div class="w">' + esc(w.text) + '</div>' +
+      (w.ipa ? '<div class="ipa">/' + esc(w.ipa) + '/</div>' : '') +
+      (w.pos ? '<span class="pos">' + esc(w.pos) + '</span>' : '') +
+      '<div class="mean">' + esc(w.mean) + '</div>' +
+      (w.ext ? '<div class="ext">= ' + esc(w.ext) + '</div>' : '');
+    card.innerHTML = html;
+    card.addEventListener("click", function () { playWord(card); });
+    wordList.appendChild(card);
+  });
+}
+
+/* ===== 音频朗读 ===== */
+function playWord(card) {
+  var src = card.dataset.audio;
+  if (currentAudio) {
+    try { currentAudio.pause(); } catch (e) {}
+    currentAudio = null;
+  }
+  if (speakingCard) { speakingCard.classList.remove("speaking"); speakingCard = null; }
+
+  var a = new Audio(src);
+  currentAudio = a;
+  speakingCard = card;
+  card.classList.add("speaking");
+  a.onended = function () {
+    card.classList.remove("speaking");
+    if (speakingCard === card) speakingCard = null;
+    if (currentAudio === a) currentAudio = null;
+  };
+  a.onerror = function () {
+    card.classList.remove("speaking");
+    if (speakingCard === card) speakingCard = null;
+    if (currentAudio === a) currentAudio = null;
+    toast("音频加载失败：" + src);
+  };
+  var p = a.play();
+  if (p && p.catch) {
+    p.catch(function () {
+      card.classList.remove("speaking");
+      toast("点击浏览器后请允许播放声音");
+    });
+  }
+}
+
+/* ===== 视频 ===== */
+function renderTabs(unit) {
+  videoTabs.innerHTML = "";
+  var keys = unit.videos ? Object.keys(unit.videos) : [];
+  keys.forEach(function (key) {
+    var v = unit.videos[key];
+    var btn = document.createElement("button");
+    btn.textContent = v.label || key;
+    btn.dataset.key = key;
+    btn.addEventListener("click", function () { setVideo(unit, key); });
+    videoTabs.appendChild(btn);
+  });
+  videoTabs.style.display = unit.videos ? "" : "none";
+}
+
+function setVideo(unit, key) {
+  currentVideoKey = key;
+  var btns = videoTabs.querySelectorAll("button");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle("on", btns[i].dataset.key === key);
+  }
+  var v = unit.videos ? unit.videos[key] : null;
+  if (v && v.file) {
+    player.src = "media/video/" + v.file;
+    videoEmpty.style.display = "none";
+    player.style.display = "block";
+    player.load();
+  } else {
+    player.pause();
+    player.removeAttribute("src");
+    player.style.display = "none";
+    videoEmpty.style.display = "flex";
+  }
+}
+
+/* ===== 单元视图 ===== */
+function unitGrade(unitId) {
+  for (var g in GRADE_BOOKS) {
+    var books = GRADE_BOOKS[g];
+    for (var b = 0; b < books.length; b++) {
+      if (books[b].units.indexOf(unitId) !== -1) return parseInt(g, 10);
+    }
+  }
+  return null;
+}
+
+function showUnit(id) {
+  var idx = -1;
+  for (var i = 0; i < WORDS_DATA.length; i++) {
+    if (WORDS_DATA[i].id === id) { idx = i; break; }
+  }
+  if (idx === -1) { location.hash = "#/"; return; }
+  var unit = WORDS_DATA[idx];
+  currentUnitId = id;
+  currentGrade = unitGrade(id);
+
+  unitTitle.textContent = unit.title;
+  var vm = VIDEO_MAP[id];
+  unit.videos = vm || null;
+  wordPanelTitle.innerHTML = "本课单词 <span>(" + unit.words.length + " 个，点击朗读)</span>";
+
+  renderTabs(unit);
+  renderWords(unit);
+  setVideo(unit, currentVideoKey);
+  markNav(currentGrade);
+
+  viewHome.classList.remove("on");
+  viewGrade.classList.remove("on");
+  viewUnit.classList.add("on");
+}
+
+/* ===== 年级视图（单元列表） ===== */
+function showGrade(gradeId) {
+  var books = GRADE_BOOKS[gradeId];
+  if (!books) { location.hash = "#/"; return; }
+  currentGrade = gradeId;
+  currentUnitId = null;
+  if (player) { player.pause(); }
+
+  gradeTitle.textContent = GRADE_NAMES[gradeId - 1] || ("年级 " + gradeId);
+  gradeBody.innerHTML = "";
+  books.forEach(function (book) {
+    var group = document.createElement("div");
+    group.className = "book-group";
+
+    var h = document.createElement("div");
+    h.className = "book-name";
+    h.textContent = book.name;
+    group.appendChild(h);
+
+    if (!book.units || book.units.length === 0) {
+      var soon = document.createElement("div");
+      soon.className = "book-soon";
+      soon.textContent = book.name + "内容即将上线";
+      group.appendChild(soon);
+    } else {
+      var grid = document.createElement("div");
+      grid.className = "unit-grid";
+      book.units.forEach(function (uid) {
+        var u = null;
+        for (var i = 0; i < WORDS_DATA.length; i++) {
+          if (WORDS_DATA[i].id === uid) { u = WORDS_DATA[i]; break; }
+        }
+        if (!u) return;
+        var card = document.createElement("div");
+        card.className = "unit-card";
+        var vm2 = VIDEO_MAP[uid];
+        var vcount = vm2 ? Object.keys(vm2).length : 0;
+        var meta = u.words.length + " 个单词 · " + (vcount ? vcount + " 个视频" : "无视频");
+        card.innerHTML = '<div class="uc-title">' + esc(u.title) + '</div>' +
+          '<div class="uc-meta">' + meta + '</div>';
+        card.addEventListener("click", function () { location.hash = "#/unit/" + uid; });
+        grid.appendChild(card);
+      });
+      group.appendChild(grid);
+    }
+    gradeBody.appendChild(group);
+  });
+
+  markNav(gradeId);
+  viewHome.classList.remove("on");
+  viewUnit.classList.remove("on");
+  viewGrade.classList.add("on");
+}
+
+function showHome() {
+  currentGrade = null;
+  currentUnitId = null;
+  if (player) { player.pause(); }
+  markNav(null);
+  viewUnit.classList.remove("on");
+  viewGrade.classList.remove("on");
+  viewHome.classList.add("on");
+}
+
+/* ===== 路由 ===== */
+function route() {
+  var h = location.hash || "";
+  var m = h.match(/^#\/unit\/(\d+)$/);
+  if (m) {
+    var id = parseInt(m[1], 10);
+    var exists = WORDS_DATA.some(function (u) { return u.id === id; });
+    if (exists) { showUnit(id); return; }
+  }
+  var mg = h.match(/^#\/grade\/(\d+)$/);
+  if (mg) {
+    var g = parseInt(mg[1], 10);
+    if (GRADE_BOOKS[g]) { showGrade(g); return; }
+  }
+  showHome();
+}
+
+/* ===== 事件 ===== */
+document.getElementById("backBtn").addEventListener("click", function () {
+  if (currentGrade) { location.hash = "#/grade/" + currentGrade; return; }
+  location.hash = "#/";
+});
+document.getElementById("gradeBackBtn").addEventListener("click", function () {
+  location.hash = "#/";
+});
+window.addEventListener("hashchange", route);
+
+/* ===== 启动 ===== */
+buildNav();
+route();
+</script>
+</body>
+</html>
