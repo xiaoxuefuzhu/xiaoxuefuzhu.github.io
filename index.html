@@ -327,9 +327,9 @@ var VIDEO_MAP = {
   20: { chant: { file: "u20_chant.mp4", label: "Let's chant" }, read: { file: "u20_read.mp4", label: "Let's read" } }
 };
 
-/* 资源基地址：音视频从 Gitee 仓库 raw 地址加载（本地 App 模式）。
-   如需切回本地相对路径，将此值改为 "" 即可。 */
-var RESOURCE_BASE = "https://gitee.com/zhuxinru_ts/english-helper/raw/master/";
+/* 资源基地址：音视频从 GitHub Pages 同域加载（避免 Gitee Referer 防盗链）。
+   如需切回 Gitee 或其他 CDN，修改此值即可。 */
+var RESOURCE_BASE = "";
 
 var GRADE_NAMES = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级"];
 var AVAILABLE_GRADES = [1, 2]; // 当前有一、二年级内容
