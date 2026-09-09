@@ -327,6 +327,10 @@ var VIDEO_MAP = {
   20: { chant: { file: "u20_chant.mp4", label: "Let's chant" }, read: { file: "u20_read.mp4", label: "Let's read" } }
 };
 
+/* 资源基地址：音视频从 Gitee 仓库 raw 地址加载（本地 App 模式）。
+   如需切回本地相对路径，将此值改为 "" 即可。 */
+var RESOURCE_BASE = "https://gitee.com/zhuxinru_ts/english-helper/raw/master/";
+
 var GRADE_NAMES = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级"];
 var AVAILABLE_GRADES = [1, 2]; // 当前有一、二年级内容
 
@@ -409,7 +413,7 @@ function renderWords(unit) {
   unit.words.forEach(function (w) {
     var card = document.createElement("div");
     card.className = "wcard";
-    card.dataset.audio = "media/audio/" + w.audio;
+    card.dataset.audio = RESOURCE_BASE + "media/audio/" + w.audio;
     var html =
       '<div class="w">' + esc(w.text) + '</div>' +
       (w.ipa ? '<div class="ipa">/' + esc(w.ipa) + '/</div>' : '') +
@@ -478,7 +482,7 @@ function setVideo(unit, key) {
   }
   var v = unit.videos ? unit.videos[key] : null;
   if (v && v.file) {
-    player.src = "media/video/" + v.file;
+    player.src = RESOURCE_BASE + "media/video/" + v.file;
     videoEmpty.style.display = "none";
     player.style.display = "block";
     player.load();
